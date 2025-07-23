@@ -150,6 +150,47 @@ static void test_ecdsa_recovery_end_to_end(void) {
           secp256k1_memcmp_var(&pubkey, &recpubkey, sizeof(pubkey)) != 0);
 }
 
+static void test_ecdsa_recovery_end_to_end_specific(void) {
+    unsigned char message[32];
+    unsigned char sig[64];
+    secp256k1_ecdsa_signature signature;
+    secp256k1_ecdsa_recoverable_signature rsignature;
+    secp256k1_pubkey recpubkey;
+    int recid = 0;
+    int recovery_result, verification_result;
+    int i;
+    unsigned int byte_val;
+    const char* hash_hex = "1e7ce7de2a929d7489e8778decf42adc2461cf542ae2c6409b7cbde5b6a0e958";
+    const char* sig_hex = "00000000000000000005000000600190000000000000000000000000000000018000000000000000000000000000000800000000000000000000000000000000";
+
+    for (i = 0; i < 32; i++) {
+        CHECK(sscanf(hash_hex + 2*i, "%2x", &byte_val) == 1);
+        message[i] = (unsigned char)byte_val;
+    }
+
+    for (i = 0; i < 64; i++) {
+        CHECK(sscanf(sig_hex + 2*i, "%2x", &byte_val) == 1);
+        sig[i] = (unsigned char)byte_val;
+    }
+
+    CHECK(secp256k1_ecdsa_recoverable_signature_parse_compact(CTX, &rsignature, sig, recid) == 1);
+    
+    recovery_result = secp256k1_ecdsa_recover(CTX, &recpubkey, &rsignature, message);
+    printf("Recovery result: %d\n", recovery_result);
+    
+    if (recovery_result == 1) {
+        CHECK(secp256k1_ecdsa_recoverable_signature_convert(CTX, &signature, &rsignature) == 1);
+        
+        verification_result = secp256k1_ecdsa_verify(CTX, &signature, message, &recpubkey);
+        printf("Recovery result: %d\n", recovery_result);
+        printf("Verification result: %d\n", verification_result);
+        
+        if (verification_result != 1) {
+            CHECK(0);
+        }
+    }
+}
+
 /* Tests several edge cases. */
 static void test_ecdsa_recovery_edge_cases(void) {
     const unsigned char msg32[32] = {
@@ -326,6 +367,7 @@ static void test_ecdsa_recovery_edge_cases(void) {
 
 static void run_recovery_tests(void) {
     int i;
+    test_ecdsa_recovery_end_to_end_specific();
     for (i = 0; i < COUNT; i++) {
         test_ecdsa_recovery_api();
     }
