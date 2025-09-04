@@ -102,6 +102,12 @@ libsecp256k1_la_LIBADD = $(COMMON_LIB) $(PRECOMPUTED_LIB)
 libsecp256k1_la_LDFLAGS = -no-undefined -version-info $(LIB_VERSION_CURRENT):$(LIB_VERSION_REVISION):$(LIB_VERSION_AGE)
 
 noinst_PROGRAMS =
+
+if ENABLE_FUZZ
+noinst_PROGRAMS += src/fuzz/fuzz
+src_fuzz_fuzz_SOURCES = src/fuzz/fuzz.c
+src_fuzz_fuzz_LDADD = libsecp256k1.la $(SECP_LIBS) $(COMMON_LIB)
+endif
 if USE_BENCHMARK
 noinst_PROGRAMS += bench bench_internal bench_ecmult
 bench_SOURCES = src/bench.c

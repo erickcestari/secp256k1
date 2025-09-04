@@ -147,6 +147,17 @@ AC_ARG_ENABLE(coverage,
     AS_HELP_STRING([--enable-coverage],[enable coverage analysis support [default=no]]), [],
     [SECP_SET_DEFAULT([enable_coverage], [no], [no])])
 
+AC_ARG_ENABLE(fuzz,
+    AS_HELP_STRING([--enable-fuzz],[enable building fuzz targets, this will disable all other targets [default=yes]]),
+    [enable_fuzz=$enableval],
+    [enable_fuzz=no])
+
+dnl Enable different -fsanitize options
+AC_ARG_WITH(sanitizers,
+    [AS_HELP_STRING([--with-sanitizers],
+                    [comma separated list of extra sanitizers to build with (default is none enabled)])],
+    [use_sanitizers=$withval])
+
 AC_ARG_ENABLE(tests,
     AS_HELP_STRING([--enable-tests],[compile tests [default=yes]]), [],
     [SECP_SET_DEFAULT([enable_tests], [yes], [yes])])
@@ -244,6 +255,25 @@ else
   else
     enable_valgrind=yes
   fi
+fi
+
+dnl enable-fuzz should disable all other targets
+if test x"$enable_fuzz" = x"yes"; then
+  use_sanitizers="fuzzer,$use_sanitizers"
+  AC_MSG_WARN(enable-fuzz will disable all other targets, asm implementation and gmp usage)
+  req_asm=no
+  req_bignum=no
+  use_tests=no
+  use_benchmark=no
+  enable_coverage=no
+  enable_openssl_tests=no
+  use_exhaustive_tests=no
+  enable_tests=no
+  enable_benchmark=no
+  enable_exhaustive_tests=no
+  enable_examples=no
+  enable_coverage=no
+  enable_openssl_tests=no
 fi
 
 if test x"$enable_ctime_tests" = x"auto"; then
@@ -443,6 +473,35 @@ if test x"$enable_experimental" = x"no"; then
   fi
 fi
 
+dnl This has to be last because adding `-fsanitize=fuzz` will collide the `main` function with everything else here
+if test x"$use_sanitizers" != x; then
+  dnl First check if the compiler accepts flags. If an incompatible pair like
+  dnl -fsanitize=address,thread is used here, this check will fail. This will also
+  dnl fail if a bad argument is passed, e.g. -fsanitize=undefined
+  AX_CHECK_COMPILE_FLAG(
+    [[-fsanitize=$use_sanitizers]],
+    [[CFLAGS="-fsanitize=$use_sanitizers $CFLAGS"]],
+    [AC_MSG_ERROR([compiler did not accept requested flags])])
+
+  dnl Some compilers (e.g. GCC) require additional libraries like libasan,
+  dnl libtsan, libubsan, etc. Make sure linking still works with the sanitize
+  dnl flag. This is a separate check so we can give a better error message when
+  dnl the sanitize flags are supported by the compiler but the actual sanitizer
+  dnl libs are missing.
+  AX_CHECK_LINK_FLAG(
+    [[-fsanitize=$use_sanitizers]],
+    [[LDFLAGS="-fsanitize=$use_sanitizers $LDFLAGS"]],
+    [AC_MSG_ERROR([linker did not accept requested flags, you are missing required libraries])],
+    [],
+    [AC_LANG_PROGRAM([[
+    #include <stdint.h>
+    #include <stddef.h>
+    int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) { return 0; }
+    __attribute__((weak))
+     /* AC-LANG-PROGRAM will put int main(..) after this which will conflict with libFuzzer's main, weak symbol resolves it */
+    ]],[[]])])
+fi
+
 ###
 ### Generate output
 ###
@@ -451,6 +510,7 @@ AC_CONFIG_FILES([Makefile libsecp256k1.pc])
 AC_SUBST(SECP_CFLAGS)
 AC_SUBST(SECP_CONFIG_DEFINES)
 AM_CONDITIONAL([ENABLE_COVERAGE], [test x"$enable_coverage" = x"yes"])
+AM_CONDITIONAL([ENABLE_FUZZ],[test x$enable_fuzz = x"yes"])
 AM_CONDITIONAL([USE_TESTS], [test x"$enable_tests" != x"no"])
 AM_CONDITIONAL([USE_CTIME_TESTS], [test x"$enable_ctime_tests" = x"yes"])
 AM_CONDITIONAL([USE_EXHAUSTIVE_TESTS], [test x"$enable_exhaustive_tests" != x"no"])
@@ -479,6 +539,8 @@ echo "  with tests              = $enable_tests"
 echo "  with exhaustive tests   = $enable_exhaustive_tests"
 echo "  with ctime tests        = $enable_ctime_tests"
 echo "  with coverage           = $enable_coverage"
+echo "  with fuzz               = $enable_fuzz"
+echo "  with sanitizers         = $use_sanitizers"
 echo "  with examples           = $enable_examples"
 echo "  module ecdh             = $enable_module_ecdh"
 echo "  module recovery         = $enable_module_recovery"
