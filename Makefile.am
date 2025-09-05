@@ -105,7 +105,9 @@ noinst_PROGRAMS =
 
 if ENABLE_FUZZ
 noinst_PROGRAMS += secp256k1-fuzzer
-secp256k1_fuzzer_SOURCES = fuzz/fuzz.c fuzz/scalar_targets.c
+secp256k1_fuzzer_SOURCES = fuzz/fuzz.c
+secp256k1_fuzzer_SOURCES += fuzz/scalar_targets.c
+secp256k1_fuzzer_SOURCES += fuzz/fe_targets.c
 secp256k1_fuzzer_CPPFLAGS = -I$(top_srcdir) $(SECP_CONFIG_DEFINES) -DVERIFY
 secp256k1_fuzzer_LDADD = $(COMMON_LIB) $(PRECOMPUTED_LIB)
 secp256k1_fuzzer_DEPENDENCIES = $(PRECOMPUTED_LIB)

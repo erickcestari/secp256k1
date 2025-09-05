@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "scalar_targets.h"
+#include "fuzz/scalar_targets.h"
+#include "fuzz/fe_targets.h"
 
 typedef void (*fuzz_function)(const uint8_t* data, size_t size);
 static fuzz_function selected_fuzz_function = NULL;
@@ -61,6 +62,26 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
         selected_fuzz_function = &fuzz_scalar_mul_distributivity_right;
     } else if (strcmp(fuzz_target, "scalar_get_bits_consistency") == 0) {
         selected_fuzz_function = &fuzz_scalar_get_bits_consistency;
+    } else if (strcmp(fuzz_target, "fe_add_commutativity") == 0) {
+    selected_fuzz_function = &fuzz_fe_add_commutativity;
+    } else if (strcmp(fuzz_target, "fe_mul_commutativity") == 0) {
+        selected_fuzz_function = &fuzz_fe_mul_commutativity;
+    } else if (strcmp(fuzz_target, "fe_mul_associativity") == 0) {
+        selected_fuzz_function = &fuzz_fe_mul_associativity;
+    } else if (strcmp(fuzz_target, "fe_sqr_vs_mul") == 0) {
+        selected_fuzz_function = &fuzz_fe_sqr_vs_mul;
+    } else if (strcmp(fuzz_target, "fe_neg_add_zero") == 0) {
+        selected_fuzz_function = &fuzz_fe_neg_add_zero;
+    } else if (strcmp(fuzz_target, "fe_inv_consistency") == 0) {
+        selected_fuzz_function = &fuzz_fe_inv_consistency;
+    } else if (strcmp(fuzz_target, "fe_sqrt_roundtrip") == 0) {
+        selected_fuzz_function = &fuzz_fe_sqrt_roundtrip;
+    } else if (strcmp(fuzz_target, "fe_normalize_idempotent") == 0) {
+        selected_fuzz_function = &fuzz_fe_normalize_idempotent;
+    } else if (strcmp(fuzz_target, "fe_b32_roundtrip") == 0) {
+        selected_fuzz_function = &fuzz_fe_b32_roundtrip;
+    } else if (strcmp(fuzz_target, "fe_get_bits_parity") == 0) {
+        selected_fuzz_function = &fuzz_fe_get_bits_parity;
     } else {
         fprintf(stderr, "Unknown fuzz target selected using FUZZ environment variable: %s\n", fuzz_target);
         assert(0);
