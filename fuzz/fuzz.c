@@ -38,11 +38,29 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
     } else if (strcmp(fuzz_target, "scalar_negate") == 0) {
         selected_fuzz_function = &fuzz_scalar_negate;
     } else if (strcmp(fuzz_target, "scalar_shift") == 0) {
-        // selected_fuzz_function = &fuzz_scalar_shift;
+        selected_fuzz_function = &fuzz_scalar_shift;
     } else if (strcmp(fuzz_target, "scalar_split_lambda") == 0) {
         selected_fuzz_function = &fuzz_scalar_split_lambda;
     } else if (strcmp(fuzz_target, "scalar_cmov") == 0) {
         selected_fuzz_function = &fuzz_scalar_cmov;
+    } else if (strcmp(fuzz_target, "scalar_half_double") == 0) {
+        selected_fuzz_function = &fuzz_scalar_half_double;
+    } else if (strcmp(fuzz_target, "scalar_inverse_consistency") == 0) {
+        selected_fuzz_function = &fuzz_scalar_inverse_consistency;
+    } else if (strcmp(fuzz_target, "scalar_cond_negate_contract") == 0) {
+        selected_fuzz_function = &fuzz_scalar_cond_negate_contract;
+    } else if (strcmp(fuzz_target, "scalar_high_normalization") == 0) {
+        selected_fuzz_function = &fuzz_scalar_high_normalization;
+    } else if (strcmp(fuzz_target, "scalar_b32_roundtrip") == 0) {
+        selected_fuzz_function = &fuzz_scalar_b32_roundtrip;
+    } else if (strcmp(fuzz_target, "scalar_signed62_roundtrip") == 0) {
+        selected_fuzz_function = &fuzz_scalar_signed62_roundtrip;
+    } else if (strcmp(fuzz_target, "scalar_square_via_mul") == 0) {
+        selected_fuzz_function = &fuzz_scalar_square_via_mul;
+    } else if (strcmp(fuzz_target, "scalar_mul_distributivity_right") == 0) {
+        selected_fuzz_function = &fuzz_scalar_mul_distributivity_right;
+    } else if (strcmp(fuzz_target, "scalar_get_bits_consistency") == 0) {
+        selected_fuzz_function = &fuzz_scalar_get_bits_consistency;
     } else {
         fprintf(stderr, "Unknown fuzz target selected using FUZZ environment variable: %s\n", fuzz_target);
         assert(0);
