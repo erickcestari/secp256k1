@@ -12,6 +12,7 @@ ecdsa_example
 schnorr_example
 ellswift_example
 musig_example
+secp256k1-fuzzer
 *.exe
 *.so
 *.a

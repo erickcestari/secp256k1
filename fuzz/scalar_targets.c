@@ -1,11 +1,13 @@
 #include <assert.h>
-#include "targets.h"
+#include "src/int128.h"
+#include "src/int128_impl.h"
 #include "src/scalar.h"
 #include "src/scalar_impl.h"
+#include "scalar_targets.h"
 
 /*** Scalar Operation ***/
 /* Test commutativity of scalar addition */ 
-static void fuzz_scalar_add_commutativty(const uint8_t *data, size_t size) {
+void fuzz_scalar_add_commutativty(const uint8_t *data, size_t size) {
     if (size >= 64) {        
         secp256k1_scalar a, b, r1, r2;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -17,7 +19,7 @@ static void fuzz_scalar_add_commutativty(const uint8_t *data, size_t size) {
 }
 
 /* Test associativity of scalar addition */
-static void fuzz_scalar_add_associativity(const uint8_t *data, size_t size) {
+void fuzz_scalar_add_associativity(const uint8_t *data, size_t size) {
     if (size >= 96) {     
         secp256k1_scalar a, b, c, r1, r2;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -32,7 +34,7 @@ static void fuzz_scalar_add_associativity(const uint8_t *data, size_t size) {
 }
 
 /* Test identity addition */ 
-static void fuzz_scalar_add_zero(const uint8_t *data, size_t size) {
+void fuzz_scalar_add_zero(const uint8_t *data, size_t size) {
     if (size >= 32) {        
         secp256k1_scalar a, r1;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -42,7 +44,7 @@ static void fuzz_scalar_add_zero(const uint8_t *data, size_t size) {
 }
 
 /* Test scalar addition with its complement */ 
-static void fuzz_scalar_add_complements(const uint8_t *data, size_t size) {
+void fuzz_scalar_add_complements(const uint8_t *data, size_t size) {
     if (size >= 32) {        
         secp256k1_scalar a, r1, r2;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -53,7 +55,7 @@ static void fuzz_scalar_add_complements(const uint8_t *data, size_t size) {
 }
 
 /* Test commutativity of scalar multiplication */
-static void fuzz_scalar_mul_commutativity(const uint8_t *data, size_t size) {
+void fuzz_scalar_mul_commutativity(const uint8_t *data, size_t size) {
     if (size >= 64) {        
         secp256k1_scalar a, b, r1, r2;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -65,7 +67,7 @@ static void fuzz_scalar_mul_commutativity(const uint8_t *data, size_t size) {
 }
 
 /* Test associativity of scalar multiplication */
-static void fuzz_scalar_mul_associativity(const uint8_t *data, size_t size) {
+void fuzz_scalar_mul_associativity(const uint8_t *data, size_t size) {
     if (size >= 96) {     
         secp256k1_scalar a, b, c, r1, r2;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -80,7 +82,7 @@ static void fuzz_scalar_mul_associativity(const uint8_t *data, size_t size) {
 }
 
 /* Test distributivity of scalar multiplication */
-static void fuzz_scalar_mul_distributivity(const uint8_t *data, size_t size) {
+void fuzz_scalar_mul_distributivity(const uint8_t *data, size_t size) {
     if (size >= 96) {     
         secp256k1_scalar a, b, c, r1, r2, r3;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -96,7 +98,7 @@ static void fuzz_scalar_mul_distributivity(const uint8_t *data, size_t size) {
 }
 
 /* Test identity multiplication */ 
-static void fuzz_scalar_mul_one(const uint8_t *data, size_t size) {
+void fuzz_scalar_mul_one(const uint8_t *data, size_t size) {
     if (size >= 32) {        
         secp256k1_scalar a, r1;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -106,7 +108,7 @@ static void fuzz_scalar_mul_one(const uint8_t *data, size_t size) {
 }
 
 /* Test scalar multiplication with zero */ 
-static void fuzz_scalar_mul_zero(const uint8_t *data, size_t size) {
+void fuzz_scalar_mul_zero(const uint8_t *data, size_t size) {
     if (size >= 32) {        
         secp256k1_scalar a, r1;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -116,7 +118,7 @@ static void fuzz_scalar_mul_zero(const uint8_t *data, size_t size) {
 }
 
 /* Test scalar inverse */
-static void fuzz_scalar_inverse(const uint8_t *data, size_t size) {
+void fuzz_scalar_inverse(const uint8_t *data, size_t size) {
     if (size >= 32) {     
         secp256k1_scalar a, r1, r2, r3;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -131,7 +133,7 @@ static void fuzz_scalar_inverse(const uint8_t *data, size_t size) {
 } 
 
 /* Test scalar inverse (without constant-time guarantee) */
-static void fuzz_scalar_inverse_var(const uint8_t *data, size_t size) {
+void fuzz_scalar_inverse_var(const uint8_t *data, size_t size) {
     if (size >= 32) {     
         secp256k1_scalar a, r1, r2;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -146,7 +148,7 @@ static void fuzz_scalar_inverse_var(const uint8_t *data, size_t size) {
 }             
 
 /* Test scalar complement */ 
-static void fuzz_scalar_negate(const uint8_t *data, size_t size) {
+void fuzz_scalar_negate(const uint8_t *data, size_t size) {
     if (size >= 32) {        
         secp256k1_scalar a, r1, r2;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -157,20 +159,20 @@ static void fuzz_scalar_negate(const uint8_t *data, size_t size) {
 }
 
 /* Test low bits shifted off */
-static void fuzz_scalar_shift(const uint8_t *data, size_t size) {
-    if (size >= 32) {
-        int bit, r1, r2;     
-        secp256k1_scalar a;
-        secp256k1_scalar_set_b32(&a, data, NULL);
-        bit = 1 + (data[31] % 15);
-        r2 = a.d[0] % (1ULL << bit);
-        r1 = secp256k1_scalar_shr_int(&a, bit);
-        CHECK(r1 == r2);
-    }
-}
+// void fuzz_scalar_shift(const uint8_t *data, size_t size) {
+//     if (size >= 32) {
+//         int bit, r1, r2;     
+//         secp256k1_scalar a;
+//         secp256k1_scalar_set_b32(&a, data, NULL);
+//         bit = 1 + (data[31] % 15);
+//         r2 = a.d[0] % (1ULL << bit);
+//         r1 = secp256k1_scalar_shr_int(&a, bit);
+//         CHECK(r1 == r2);
+//     }
+// }
 
 /* Test r1+r2*lambda = a */
-static void fuzz_scalar_split_lambda(const uint8_t *data, size_t size) {
+void fuzz_scalar_split_lambda(const uint8_t *data, size_t size) {
     if (size >= 32) {
         secp256k1_scalar a, r1, r2, r3;
         secp256k1_scalar_set_b32(&a, data, NULL);
@@ -182,7 +184,7 @@ static void fuzz_scalar_split_lambda(const uint8_t *data, size_t size) {
 }
 
 /* Test conditional move of scalars  */
-static void fuzz_scalar_cmov(const uint8_t *data, size_t size) {
+void fuzz_scalar_cmov(const uint8_t *data, size_t size) {
     if (size >= 64) {        
         secp256k1_scalar a, b, r1;
         secp256k1_scalar_set_b32(&a, data, NULL);

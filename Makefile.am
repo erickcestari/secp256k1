@@ -104,9 +104,11 @@ libsecp256k1_la_LDFLAGS = -no-undefined -version-info $(LIB_VERSION_CURRENT):$(L
 noinst_PROGRAMS =
 
 if ENABLE_FUZZ
-noinst_PROGRAMS += src/fuzz/fuzz
-src_fuzz_fuzz_SOURCES = src/fuzz/fuzz.c
-src_fuzz_fuzz_LDADD = libsecp256k1.la $(SECP_LIBS) $(COMMON_LIB)
+noinst_PROGRAMS += secp256k1-fuzzer
+secp256k1_fuzzer_SOURCES = fuzz/fuzz.c fuzz/scalar_targets.c
+secp256k1_fuzzer_CPPFLAGS = -I$(top_srcdir) $(SECP_CONFIG_DEFINES) -DVERIFY
+secp256k1_fuzzer_LDADD = $(COMMON_LIB) $(PRECOMPUTED_LIB)
+secp256k1_fuzzer_DEPENDENCIES = $(PRECOMPUTED_LIB)
 endif
 if USE_BENCHMARK
 noinst_PROGRAMS += bench bench_internal bench_ecmult

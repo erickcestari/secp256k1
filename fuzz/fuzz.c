@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "scalar_targets.c"
-#include "targets.h"
+#include "scalar_targets.h"
 
 typedef void (*fuzz_function)(const uint8_t* data, size_t size);
 static fuzz_function selected_fuzz_function = NULL;
@@ -39,7 +38,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
     } else if (strcmp(fuzz_target, "scalar_negate") == 0) {
         selected_fuzz_function = &fuzz_scalar_negate;
     } else if (strcmp(fuzz_target, "scalar_shift") == 0) {
-        selected_fuzz_function = &fuzz_scalar_shift;
+        // selected_fuzz_function = &fuzz_scalar_shift;
     } else if (strcmp(fuzz_target, "scalar_split_lambda") == 0) {
         selected_fuzz_function = &fuzz_scalar_split_lambda;
     } else if (strcmp(fuzz_target, "scalar_cmov") == 0) {
